@@ -1,0 +1,3 @@
+修改bootsect.s和bulid.c中的SETUPLEN参数
+setup.s由bootsect.s修改而来，要注意int10的0X0e和0x13功能号的打印字符的区别，主要导致了是否需要读一次光标
+
