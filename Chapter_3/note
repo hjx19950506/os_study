@@ -1,0 +1,32 @@
+linux-0.11/include/unistd.h
+	添加2个宏定义
+		#define __NR_iam	72
+		#define __NR_whoami	73
+	添加2个函数的声明(定义在lib文件夹的两个.c中)
+		int iam(const char* name);
+		int whoami(char* name,unsigned int size);
+！！还需要在linux0.11的/usr/include/unistd.h中添加以上内容		？？修改哪里可以使得编译成的image随之修改，还是就是存入磁盘的内容
+
+linux-0.11/lib
+	添加两个.c文件和两个API接口
+		iam.c		_syscall1(int,iam,const char*,name)
+		whoami.c	_syscall2(int,whoami,char*,name,unsigned int,size)
+
+linux-0.11/kernel/system_call.s中nr_system_calls的数值由72改为74
+
+linux-0.11/include/linux/sys.h中的fn_ptr sys_call_table[]数组添加2项,extern函数也要添加
+
+linux-0.11/kernel/中添加who.c和两个系统调用函数
+
+linux-0.11/kernel/Makefile	OBJS添加who.o
+				添加who.o的规则
+
+
+
+
+start	-->	ami()		(API，		在/lib中的_who.c文件中以_syscall宏定义的方式，将调用号存入EAX,参数存入通用寄存器)
+	-->	int80		(系统中断，	_syscall实际发生了中断调用int80,int80在init时的DPL被设为3)
+	-->	sys_ami()	(系统调用，	在/kernel中的who.c中，根据调用号在sys_call_table找到对应的sys_xxx()函数，
+						该函数DPL为0，进入内核态)
+
+linux=0.11/include/asm/segment.h中的get_fs_xxxx和put_fs_xxxx是利用fs段寄存器来实现用户空间和内核空间交互的桥梁
